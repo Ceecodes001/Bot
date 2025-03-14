@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enhanced Chat Bot</title>
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    /* Chat Container */
+    .chat-container {
+      width: 100%;
+      max-width: 600px;
+      height: 80vh;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    /* Header */
+    .chat-header {
+      background: #4a90e2;
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    /* Chat Body */
+    .chat-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f9f9f9;
+    }
+    /* Chat Message Styles */
+    .chat-message {
+      margin-bottom: 15px;
+      display: flex;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .chat-message.bot {
+      justify-content: flex-start;
+    }
+    .chat-message.user {
+      justify-content: flex-end;
+    }
+    .message-content {
+      max-width: 70%;
+      padding: 10px 15px;
+      border-radius: 20px;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+    .chat-message.bot .message-content {
+      background: #e1e1e1;
+      color: #333;
+      border-bottom-left-radius: 0;
+    }
+    .chat-message.user .message-content {
+      background: #4a90e2;
+      color: #fff;
+      border-bottom-right-radius: 0;
+    }
+    /* Chat Input */
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
+    .chat-input input {
+      flex: 1;
+      border: none;
+      padding: 15px;
+      font-size: 1rem;
+      outline: none;
+    }
+    .chat-input button {
+      background: #4a90e2;
+      border: none;
+      color: #fff;
+      padding: 15px 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s ease;
+    }
+    .chat-input button:hover {
+      background: #3a78c2;
+    }
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">Enhanced Chat Bot</div>
+    <div class="chat-body" id="chatBody">
+      <!-- Chat messages will appear here -->
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Type your message here..." autocomplete="off" />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const chatBody = document.getElementById('chatBody');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Predefined static responses for common keywords and phrases
+    const predefinedResponses = {
+      "hello": "Hi there! How can I help you today?",
+      "hi": "Hello! What can I do for you?",
+      "help": "Sure, I'm here to assist you. What do you need help with?",
+      "price": "Our pricing is very competitive. Could you specify which product you're interested in?",
+      "thanks": "You're welcome! Let me know if you have more questions.",
+      "bye": "Goodbye! Have a great day!",
+      "name": "I'm your friendly chat bot, at your service.",
+      "who are you": "I'm a chat bot designed to assist you with various queries and searches.",
+      "how are you": "I'm just a program, but I'm functioning as expected!",
+      "purpose": "My purpose is to help answer your questions and assist you with searches.",
+      "default": "I'm sorry, I didn't understand that. Could you please rephrase?"
+    };
+
+    // Simulated dynamic response generator
+    function generateDynamicResponse(keyword) {
+      const randomIndex = Math.floor(Math.random() * 1000000);
+      return `Dynamic response for "${keyword}" #${randomIndex}`;
+    }
+
+    // Check for arithmetic operations in the user input
+    function checkForOperations(input) {
+      input = input.toLowerCase();
+      let match;
+      // Addition: "add 5 and 3" or "add 5 to 3"
+      if (match = input.match(/add\s+(\d+)\s+(and|to)\s+(\d+)/)) {
+        const num1 = parseFloat(match[1]);
+        const num2 = parseFloat(match[3]);
+        return `The result of adding ${num1} and ${num2} is ${num1 + num2}.`;
+      }
+      // Subtraction: "subtract 2 from 10"
+      if (match = input.match(/subtract\s+(\d+)\s+from\s+(\d+)/)) {
+        const num1 = parseFloat(match[1]);
+        const num2 = parseFloat(match[2]);
+        return `The result of subtracting ${num1} from ${num2} is ${num2 - num1}.`;
+      }
+      // Multiplication: "multiply 4 and 6" or "multiply 4 by 6"
+      if (match = input.match(/multiply\s+(\d+)\s+(and|by)\s+(\d+)/)) {
+        const num1 = parseFloat(match[1]);
+        const num2 = parseFloat(match[3]);
+        return `The result of multiplying ${num1} and ${num2} is ${num1 * num2}.`;
+      }
+      // Division: "divide 20 by 4"
+      if (match = input.match(/divide\s+(\d+)\s+by\s+(\d+)/)) {
+        const num1 = parseFloat(match[1]);
+        const num2 = parseFloat(match[2]);
+        if (num2 !== 0) {
+          return `The result of dividing ${num1} by ${num2} is ${num1 / num2}.`;
+        } else {
+          return `Division by zero is not allowed.`;
+        }
+      }
+      return null;
+    }
+
+    // Asynchronously perform a Wikipedia search/define operation
+    async function performWikipediaSearch(query) {
+      // Let the user know we're searching
+      addMessage(`Searching Wikipedia for "${query}"...`, 'bot');
+      try {
+        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Page not found");
+        }
+        const data = await response.json();
+        // Use the extract from Wikipedia; if not available, use a default message.
+        const extract = data.extract || "No summary available for this topic.";
+        addMessage(extract, 'bot');
+      } catch (error) {
+        addMessage(`Sorry, I couldn't fetch the information for "${query}".`, 'bot');
+      }
+    }
+
+    // Main function to get a bot response based on user input
+    function getResponse(userInput) {
+      // First, check for arithmetic operations
+      const operationResult = checkForOperations(userInput);
+      if (operationResult) {
+        return operationResult;
+      }
+      
+      // Next, check for predefined static responses using keyword matching
+      for (let key in predefinedResponses) {
+        if (key !== "default" && userInput.toLowerCase().includes(key)) {
+          return predefinedResponses[key];
+        }
+      }
+      
+      // If no static response is found, generate a dynamic response using the first word as a keyword.
+      const words = userInput.split(" ");
+      const keyword = words[0] || "";
+      return generateDynamicResponse(keyword);
+    }
+
+    // Add a new message to the chat window
+    function addMessage(content, sender) {
+      const messageEl = document.createElement('div');
+      messageEl.classList.add('chat-message', sender);
+      
+      const contentEl = document.createElement('div');
+      contentEl.classList.add('message-content');
+      contentEl.textContent = content;
+      
+      messageEl.appendChild(contentEl);
+      chatBody.appendChild(messageEl);
+      // Auto-scroll to the bottom
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // Process user input and generate a response (or perform a search)
+    function processInput() {
+      const userText = chatInput.value.trim();
+      if (!userText) return;
+      addMessage(userText, 'user');
+
+      // Check if the input is a Wikipedia search or define command.
+      const lowerText = userText.toLowerCase();
+      if (lowerText.startsWith("search:") || lowerText.startsWith("define:")) {
+        const query = userText.substring(userText.indexOf(":") + 1).trim();
+        performWikipediaSearch(query);
+      } else {
+        const botResponse = getResponse(userText);
+        setTimeout(() => {
+          addMessage(botResponse, 'bot');
+        }, 500);
+      }
+      chatInput.value = '';
+    }
+
+    // Event listeners for sending messages
+    sendBtn.addEventListener('click', processInput);
+    chatInput.addEventListener('keyup', event => {
+      if (event.key === 'Enter') {
+        processInput();
+      }
+    });
+
+    // Initial welcome message from the bot
+    window.onload = () => {
+      addMessage("Welcome to our enhanced chat service! You can chat with me or type commands like 'search: Albert Einstein' or 'define: Quantum Mechanics'. How can I assist you today?", "bot");
+    }
+  </script>
+</body>
+</html>
